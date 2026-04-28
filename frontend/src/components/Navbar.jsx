@@ -10,6 +10,9 @@ export default function Navbar() {
     navigate('/login');
   };
 
+  const isStaff = user && (user.role === 'STAFF' || user.role === 'ADMIN');
+  const isAdmin = user && user.role === 'ADMIN';
+
   return (
     <header className="navbar">
       <Link to="/books" className="brand">
@@ -18,9 +21,18 @@ export default function Navbar() {
       <nav className="nav-links">
         <Link to="/books">Browse</Link>
         {user && <Link to="/my-loans">My Loans</Link>}
+        {isStaff && <Link to="/staff">Manage Books</Link>}
+        {isAdmin && <Link to="/admin">Admin</Link>}
         {user ? (
           <>
-            <span className="nav-user">Hi, {user.name}</span>
+            <span className="nav-user">
+              Hi, {user.name}
+              {user.role !== 'STUDENT' && (
+                <span className={`role-badge role-${user.role.toLowerCase()}`}>
+                  {user.role}
+                </span>
+              )}
+            </span>
             <button className="btn btn-ghost" onClick={handleLogout}>Log out</button>
           </>
         ) : (

@@ -5,11 +5,21 @@ import Register from './pages/Register.jsx';
 import BrowseBooks from './pages/BrowseBooks.jsx';
 import BookDetail from './pages/BookDetail.jsx';
 import MyLoans from './pages/MyLoans.jsx';
+import StaffBooks from './pages/StaffBooks.jsx';
+import AdminReports from './pages/AdminReports.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 
-function ProtectedRoute({ children }) {
+function ProtectedRoute({ children, requireRole }) {
   const { user } = useAuth();
-  return user ? children : <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/login" replace />;
+
+  if (requireRole) {
+    const ranks = { STUDENT: 0, STAFF: 1, ADMIN: 2 };
+    if (ranks[user.role] < ranks[requireRole]) {
+      return <Navigate to="/books" replace />;
+    }
+  }
+  return children;
 }
 
 export default function App() {
@@ -28,6 +38,22 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <MyLoans />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/staff"
+            element={
+              <ProtectedRoute requireRole="STAFF">
+                <StaffBooks />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requireRole="ADMIN">
+                <AdminReports />
               </ProtectedRoute>
             }
           />

@@ -5,10 +5,10 @@ import com.lendit.bookkiosk.dto.LoginRequest;
 import com.lendit.bookkiosk.dto.RegisterRequest;
 import com.lendit.bookkiosk.model.User;
 import com.lendit.bookkiosk.repository.UserRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
 
 import java.util.Map;
 import java.util.UUID;
@@ -55,6 +55,10 @@ public class AuthService {
         return issueToken(user);
     }
 
+    /**
+     * Validate the token and return the userId.
+     * Throws 401 if the token is missing, malformed, or unknown.
+     */
     public Long validateToken(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing or malformed token");
@@ -65,6 +69,39 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or expired token");
         }
         return userId;
+    }
+
+    /**
+     * Validate token AND require that the user has at least the given role.
+     * Role hierarchy: ADMIN > STAFF > STUDENT.
+     * Throws 401 if not authenticated, 403 if authenticated but unauthorized.
+     */
+    public User requireRole(String authHeader, User.Role minRole) {
+        Long userId = validateToken(authHeader);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
+
+        if (!hasAtLeast(user.getRole(), minRole)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Requires " + minRole + " role or higher");
+        }
+        return user;
+    }
+
+    /**
+     * Returns true if `actual` meets or exceeds `required` in the role hierarchy.
+     * ADMIN can do anything STAFF can do; STAFF can do anything STUDENT can do.
+     */
+    private boolean hasAtLeast(User.Role actual, User.Role required) {
+        return rank(actual) >= rank(required);
+    }
+
+    private int rank(User.Role role) {
+        return switch (role) {
+            case STUDENT -> 0;
+            case STAFF -> 1;
+            case ADMIN -> 2;
+        };
     }
 
     public void logout(String authHeader) {
