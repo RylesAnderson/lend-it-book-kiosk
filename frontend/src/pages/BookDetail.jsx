@@ -2,16 +2,19 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useNotifications } from '../context/NotificationContext.jsx';
 
 export default function BookDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { refresh: refreshNotifications } = useNotifications();
 
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [borrowing, setBorrowing] = useState(false);
+  const [reserving, setReserving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
   const fetchBook = async () => {
@@ -42,11 +45,31 @@ export default function BookDetail() {
     try {
       const { data } = await api.post('/loans', { bookId: Number(id) });
       setSuccessMsg(`Borrowed! Due back on ${data.dueDate}.`);
-      await fetchBook(); // refresh availability
+      await fetchBook();
+      refreshNotifications(); // pull in the LOAN_CONFIRM notification
     } catch (err) {
       setError(err.response?.data?.message || 'Could not borrow this book.');
     } finally {
       setBorrowing(false);
+    }
+  };
+
+  const handleReserve = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    setReserving(true);
+    setError('');
+    setSuccessMsg('');
+    try {
+      await api.post('/reservations', { bookId: Number(id) });
+      setSuccessMsg("You're in line. We'll email you when this book is ready to pick up.");
+      refreshNotifications();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Could not reserve this book.');
+    } finally {
+      setReserving(false);
     }
   };
 
@@ -79,14 +102,30 @@ export default function BookDetail() {
           {error && <div className="error">{error}</div>}
 
           <div className="detail-actions">
-            <button
-              className="btn btn-primary btn-lg"
-              disabled={!book.available || borrowing}
-              onClick={handleBorrow}
-            >
-              {borrowing ? 'Processing…' : book.available ? 'Borrow this book' : 'Not available'}
-            </button>
-            {!user && book.available && (
+            {book.available ? (
+              <button
+                className="btn btn-primary btn-lg"
+                disabled={borrowing}
+                onClick={handleBorrow}
+              >
+                {borrowing ? 'Processing…' : 'Borrow this book'}
+              </button>
+            ) : (
+              <>
+                <button
+                  className="btn btn-primary btn-lg"
+                  disabled={reserving}
+                  onClick={handleReserve}
+                >
+                  {reserving ? 'Processing…' : 'Reserve this book'}
+                </button>
+                <p className="muted" style={{ marginTop: 8 }}>
+                  This book is checked out. Reserve it and we'll email you when it's
+                  ready to pick up.
+                </p>
+              </>
+            )}
+            {!user && (
               <p className="muted">You'll need to log in first.</p>
             )}
           </div>

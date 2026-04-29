@@ -5,6 +5,9 @@ import Register from './pages/Register.jsx';
 import BrowseBooks from './pages/BrowseBooks.jsx';
 import BookDetail from './pages/BookDetail.jsx';
 import MyLoans from './pages/MyLoans.jsx';
+import MyReservations from './pages/MyReservations.jsx';
+import Donate from './pages/Donate.jsx';
+import Instructions from './pages/Instructions.jsx';
 import StaffBooks from './pages/StaffBooks.jsx';
 import AdminReports from './pages/AdminReports.jsx';
 import { useAuth } from './context/AuthContext.jsx';
@@ -31,32 +34,33 @@ export default function App() {
           <Route path="/" element={<Navigate to="/books" replace />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+
+          {/* Public — InstructionGuide use case */}
+          <Route path="/instructions" element={<Instructions />} />
+
+          {/* Catalog */}
           <Route path="/books" element={<BrowseBooks />} />
           <Route path="/books/:id" element={<BookDetail />} />
-          <Route
-            path="/my-loans"
-            element={
-              <ProtectedRoute>
-                <MyLoans />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/staff"
-            element={
-              <ProtectedRoute requireRole="STAFF">
-                <StaffBooks />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute requireRole="ADMIN">
-                <AdminReports />
-              </ProtectedRoute>
-            }
-          />
+
+          {/* Authenticated student features */}
+          <Route path="/my-loans" element={
+            <ProtectedRoute><MyLoans /></ProtectedRoute>
+          } />
+          <Route path="/my-reservations" element={
+            <ProtectedRoute><MyReservations /></ProtectedRoute>
+          } />
+          <Route path="/donate" element={
+            <ProtectedRoute><Donate /></ProtectedRoute>
+          } />
+
+          {/* Staff / admin */}
+          <Route path="/staff" element={
+            <ProtectedRoute requireRole="STAFF"><StaffBooks /></ProtectedRoute>
+          } />
+          <Route path="/admin" element={
+            <ProtectedRoute requireRole="ADMIN"><AdminReports /></ProtectedRoute>
+          } />
+
           <Route path="*" element={<p style={{ padding: 24 }}>Page not found.</p>} />
         </Routes>
       </main>

@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import NotificationBell from './NotificationBell.jsx';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -20,11 +21,18 @@ export default function Navbar() {
       </Link>
       <nav className="nav-links">
         <Link to="/books">Browse</Link>
+        <Link to="/instructions">How to use</Link>
+
         {user && <Link to="/my-loans">My Loans</Link>}
+        {user && <Link to="/my-reservations">Reservations</Link>}
+        {user && <Link to="/donate">Donate</Link>}
+
         {isStaff && <Link to="/staff">Manage Books</Link>}
         {isAdmin && <Link to="/admin">Admin</Link>}
+
         {user ? (
           <>
+            <NotificationBell />
             <span className="nav-user">
               Hi, {user.name}
               {user.role !== 'STUDENT' && (

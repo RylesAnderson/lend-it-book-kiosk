@@ -2,6 +2,7 @@ package com.lendit.bookkiosk.service;
 
 import com.lendit.bookkiosk.dto.LoanDto;
 import com.lendit.bookkiosk.model.Book;
+import com.lendit.bookkiosk.model.EmailNotification;
 import com.lendit.bookkiosk.model.Loan;
 import com.lendit.bookkiosk.model.User;
 import com.lendit.bookkiosk.repository.BookRepository;
@@ -23,13 +24,19 @@ public class LoanService {
     private final LoanRepository loanRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
+    private final ReservationService reservationService;
 
     public LoanService(LoanRepository loanRepository,
                        BookRepository bookRepository,
-                       UserRepository userRepository) {
+                       UserRepository userRepository,
+                       NotificationService notificationService,
+                       ReservationService reservationService) {
         this.loanRepository = loanRepository;
         this.bookRepository = bookRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
+        this.reservationService = reservationService;
     }
 
     @Transactional
@@ -51,8 +58,10 @@ public class LoanService {
         bookRepository.save(book);
         loan = loanRepository.save(loan);
 
-        // Hook for EmailNotif use case — wire in an EmailService here later
-        // emailService.sendLoanConfirmation(user, loan);
+        notificationService.send(user,
+                EmailNotification.Type.LOAN_CONFIRM,
+                "Loan confirmation: " + book.getTitle(),
+                "You borrowed '" + book.getTitle() + "'. Due back by " + loan.getDueDate() + ".");
 
         return LoanDto.from(loan);
     }
@@ -71,10 +80,21 @@ public class LoanService {
 
         loan.setReturnDate(LocalDate.now());
         loan.setStatus(Loan.Status.RETURNED);
-        loan.getBook().setAvailable(true);
 
-        bookRepository.save(loan.getBook());
+        // If anyone has a pending reservation for this book, promote them
+        // to READY and KEEP the book unavailable (it's now reserved-for-pickup).
+        // Otherwise mark it available again.
+        Book book = loan.getBook();
+        boolean reservedForSomeone = reservationService.promoteNextReservationIfAny(book);
+        book.setAvailable(!reservedForSomeone);
+
+        bookRepository.save(book);
         loanRepository.save(loan);
+
+        notificationService.send(loan.getUser(),
+                EmailNotification.Type.RETURN_CONFIRM,
+                "Return confirmation: " + book.getTitle(),
+                "You returned '" + book.getTitle() + "' on " + loan.getReturnDate() + ". Thanks!");
 
         return LoanDto.from(loan);
     }
