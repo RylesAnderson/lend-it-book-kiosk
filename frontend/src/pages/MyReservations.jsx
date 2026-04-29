@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom';
 import api from '../api/client.js';
 
 const STATUS_INFO = {
-  PENDING:   { label: 'In line',           tone: '' },
-  READY:     { label: 'Ready for pickup',  tone: 'chip-warn' },
-  FULFILLED: { label: 'Picked up',         tone: 'chip-ok' },
-  CANCELLED: { label: 'Cancelled',         tone: '' },
-  EXPIRED:   { label: 'Expired',           tone: '' }
+  PENDING:   { label: 'In line',          tone: '' },
+  READY:     { label: 'Ready for pickup', tone: 'chip-warn' },
+  FULFILLED: { label: 'Picked up',        tone: 'chip-ok' },
+  CANCELLED: { label: 'Cancelled',        tone: '' },
+  EXPIRED:   { label: 'Expired',          tone: '' }
 };
 
 export default function MyReservations() {
@@ -47,15 +47,14 @@ export default function MyReservations() {
   const past = list.filter((r) => r.status !== 'PENDING' && r.status !== 'READY');
 
   return (
-    <div className="page">
+    <div className="page page-narrow">
       <div className="page-header">
-        <div>
-          <h1>My reservations</h1>
-          <p className="muted">
-            Books you've reserved while they were checked out. We'll email you when your
-            book is ready and hold it for 3 days.
-          </p>
-        </div>
+        <div className="eyebrow">Your account</div>
+        <h1>My reservations</h1>
+        <p>
+          Books you've reserved while they were checked out. We'll email you when
+          your book is ready and hold it for 3 days.
+        </p>
       </div>
 
       {error && <div className="error">{error}</div>}
@@ -68,59 +67,49 @@ export default function MyReservations() {
         </p>
       )}
 
-      {active.length > 0 && (
-        <>
-          <h2>Active ({active.length})</h2>
-          <div className="staff-book-list">
-            {active.map((r) => {
-              const info = STATUS_INFO[r.status];
-              return (
-                <div key={r.id} className="staff-book-row">
-                  <div>
-                    <strong>{r.bookTitle}</strong>
-                    <p className="muted">by {r.bookAuthor}</p>
-                    <p className="muted">
-                      Reserved {r.reservedDate}
-                      {r.readyUntilDate && ` · pick up by ${r.readyUntilDate}`}
-                    </p>
-                  </div>
-                  <div className="reservation-actions">
-                    <span className={`chip ${info.tone}`}>{info.label}</span>
-                    <button
-                      className="btn btn-ghost"
-                      disabled={cancellingId === r.id}
-                      onClick={() => handleCancel(r.id)}
-                    >
-                      {cancellingId === r.id ? 'Cancelling…' : 'Cancel'}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
+      <div className="row-list">
+        {active.length > 0 && <h2>Active ({active.length})</h2>}
+        {active.map((r) => {
+          const info = STATUS_INFO[r.status];
+          return (
+            <div key={r.id} className="row-item">
+              <div className="row-item-info">
+                <h3>{r.bookTitle}</h3>
+                <p className="muted">by {r.bookAuthor}</p>
+                <p>
+                  Reserved {r.reservedDate}
+                  {r.readyUntilDate && ` · pick up by ${r.readyUntilDate}`}
+                </p>
+              </div>
+              <div className="row-item-actions">
+                <span className={`chip ${info.tone}`}>{info.label}</span>
+                <button
+                  className="btn btn-ghost"
+                  disabled={cancellingId === r.id}
+                  onClick={() => handleCancel(r.id)}
+                >
+                  {cancellingId === r.id ? 'Cancelling…' : 'Cancel'}
+                </button>
+              </div>
+            </div>
+          );
+        })}
 
-      {past.length > 0 && (
-        <>
-          <h2>History</h2>
-          <div className="staff-book-list">
-            {past.map((r) => {
-              const info = STATUS_INFO[r.status] || { label: r.status, tone: '' };
-              return (
-                <div key={r.id} className="staff-book-row">
-                  <div>
-                    <strong>{r.bookTitle}</strong>
-                    <p className="muted">by {r.bookAuthor}</p>
-                    <p className="muted">Reserved {r.reservedDate}</p>
-                  </div>
-                  <span className={`chip ${info.tone}`}>{info.label}</span>
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
+        {past.length > 0 && <h2>History</h2>}
+        {past.map((r) => {
+          const info = STATUS_INFO[r.status] || { label: r.status, tone: '' };
+          return (
+            <div key={r.id} className="row-item">
+              <div className="row-item-info">
+                <h3>{r.bookTitle}</h3>
+                <p className="muted">by {r.bookAuthor}</p>
+                <p>Reserved {r.reservedDate}</p>
+              </div>
+              <span className={`chip ${info.tone}`}>{info.label}</span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

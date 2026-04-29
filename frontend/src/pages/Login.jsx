@@ -2,6 +2,11 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
+/**
+ * Split-screen login: institutional message on the left, form on the right.
+ * Pattern lifted from premium B2B sites (Stripe, ADP variants) where the
+ * left panel reinforces the brand voice instead of leaving cold whitespace.
+ */
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -25,42 +30,60 @@ export default function Login() {
   };
 
   return (
-    <div className="auth-page">
-      <form className="card auth-form" onSubmit={handleSubmit}>
-        <h1>Welcome back</h1>
-        <p className="muted">Log in to borrow and manage your books.</p>
+    <div className="auth-shell">
+      <aside className="auth-aside">
+        <div className="auth-aside-eyebrow">Members' library</div>
+        <div>
+          <h2 className="auth-aside-headline">
+            Welcome <em>back</em>.
+          </h2>
+          <p className="auth-aside-blurb">
+            Sign in to manage loans, reservations, and donations from anywhere —
+            then visit the kiosk to pick up your books.
+          </p>
+        </div>
+        <div className="auth-aside-meta">
+          A service of your local library system.
+        </div>
+      </aside>
 
-        <label>
-          Email
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            autoFocus
-          />
-        </label>
+      <main className="auth-main">
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <h1>Sign in</h1>
+          <p>New here? <Link to="/register">Create an account</Link>.</p>
 
-        <label>
-          Password
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </label>
+          <div className="field">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoFocus
+              autoComplete="email"
+            />
+          </div>
 
-        {error && <div className="error">{error}</div>}
+          <div className="field">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
+          </div>
 
-        <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? 'Logging in…' : 'Log in'}
-        </button>
+          {error && <div className="error">{error}</div>}
 
-        <p className="muted center">
-          No account? <Link to="/register">Create one</Link>
-        </p>
-      </form>
+          <button type="submit" className="btn btn-primary btn-lg" disabled={loading}>
+            {loading ? 'Signing in…' : 'Sign in'}
+          </button>
+        </form>
+      </main>
     </div>
   );
 }

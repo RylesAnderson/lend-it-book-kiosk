@@ -35,18 +35,13 @@ export default function BookDetail() {
   }, [id]);
 
   const handleBorrow = async () => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    setBorrowing(true);
-    setError('');
-    setSuccessMsg('');
+    if (!user) { navigate('/login'); return; }
+    setBorrowing(true); setError(''); setSuccessMsg('');
     try {
       const { data } = await api.post('/loans', { bookId: Number(id) });
       setSuccessMsg(`Borrowed! Due back on ${data.dueDate}.`);
       await fetchBook();
-      refreshNotifications(); // pull in the LOAN_CONFIRM notification
+      refreshNotifications();
     } catch (err) {
       setError(err.response?.data?.message || 'Could not borrow this book.');
     } finally {
@@ -55,13 +50,8 @@ export default function BookDetail() {
   };
 
   const handleReserve = async () => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    setReserving(true);
-    setError('');
-    setSuccessMsg('');
+    if (!user) { navigate('/login'); return; }
+    setReserving(true); setError(''); setSuccessMsg('');
     try {
       await api.post('/reservations', { bookId: Number(id) });
       setSuccessMsg("You're in line. We'll email you when this book is ready to pick up.");
@@ -79,55 +69,47 @@ export default function BookDetail() {
 
   return (
     <div className="page">
-      <button className="btn btn-ghost" onClick={() => navigate('/books')}>← Back to catalog</button>
+      <button className="detail-back" onClick={() => navigate('/books')}>
+        ← Back to catalog
+      </button>
 
       <div className="detail-layout">
         <div className="detail-cover" aria-hidden="true">{book.title.charAt(0)}</div>
 
         <div className="detail-body">
+          {book.genre && <div className="detail-eyebrow">{book.genre}</div>}
           <h1>{book.title}</h1>
           <p className="detail-author">by {book.author}</p>
 
           <div className="chip-row">
-            {book.genre && <span className="chip">{book.genre}</span>}
             <span className={`chip ${book.available ? 'chip-ok' : 'chip-warn'}`}>
               {book.available ? 'Available now' : 'Checked out'}
             </span>
-            {book.isbn && <span className="chip">ISBN {book.isbn}</span>}
+            {book.isbn && <span className="chip chip-isbn">ISBN {book.isbn}</span>}
           </div>
 
           {book.description && <p className="detail-description">{book.description}</p>}
 
-          {successMsg && <div className="success">{successMsg}</div>}
-          {error && <div className="error">{error}</div>}
+          {successMsg && <div className="success" style={{ marginBottom: 16 }}>{successMsg}</div>}
+          {error && <div className="error" style={{ marginBottom: 16 }}>{error}</div>}
 
           <div className="detail-actions">
             {book.available ? (
-              <button
-                className="btn btn-primary btn-lg"
-                disabled={borrowing}
-                onClick={handleBorrow}
-              >
+              <button className="btn btn-accent btn-lg" disabled={borrowing} onClick={handleBorrow}>
                 {borrowing ? 'Processing…' : 'Borrow this book'}
               </button>
             ) : (
               <>
-                <button
-                  className="btn btn-primary btn-lg"
-                  disabled={reserving}
-                  onClick={handleReserve}
-                >
+                <button className="btn btn-primary btn-lg" disabled={reserving} onClick={handleReserve}>
                   {reserving ? 'Processing…' : 'Reserve this book'}
                 </button>
-                <p className="muted" style={{ marginTop: 8 }}>
+                <p className="muted">
                   This book is checked out. Reserve it and we'll email you when it's
                   ready to pick up.
                 </p>
               </>
             )}
-            {!user && (
-              <p className="muted">You'll need to log in first.</p>
-            )}
+            {!user && <p className="muted">You'll need to log in first.</p>}
           </div>
         </div>
       </div>

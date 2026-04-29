@@ -24,11 +24,8 @@ export default function Donate() {
     try {
       const { data } = await api.get('/donations/mine');
       setHistory(data);
-    } catch (err) {
-      // Soft fail
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { /* soft fail */ }
+    finally { setLoading(false); }
   };
 
   useEffect(() => { fetchHistory(); }, []);
@@ -43,7 +40,6 @@ export default function Donate() {
       setSuccess(`Thanks for donating "${data.title}". Library staff will review it.`);
       setForm(EMPTY_FORM);
       await fetchHistory();
-      // Refresh the bell so the donation-received notification shows up
       refreshNotifications();
     } catch (err) {
       setError(err.response?.data?.message || 'Could not submit your donation. Try again.');
@@ -53,68 +49,70 @@ export default function Donate() {
   };
 
   return (
-    <div className="page">
+    <div className="page page-narrow">
       <div className="page-header">
-        <div>
-          <h1>Donate a book</h1>
-          <p className="muted">
-            Have a book you'd like to give to the kiosk? Drop it in the donation slot, then fill out
-            this form. Library staff reviews each donation before adding it to the catalog.
-          </p>
-        </div>
+        <div className="eyebrow">Give back</div>
+        <h1>Donate a book</h1>
+        <p>
+          Have a book you'd like to give to the kiosk? Drop it in the donation slot,
+          then fill out this form. Library staff reviews each donation before adding
+          it to the catalog.
+        </p>
       </div>
 
       {error && <div className="error">{error}</div>}
       {success && <div className="success">{success}</div>}
 
-      <section className="card" style={{ marginBottom: 24 }}>
+      <section className="card" style={{ marginBottom: 32 }}>
         <h2 style={{ marginTop: 0 }}>Submit a donation</h2>
-        <form onSubmit={handleSubmit} className="staff-form">
-          <label>
-            Title *
-            <input type="text" value={form.title} onChange={update('title')} required maxLength={255} />
-          </label>
-          <label>
-            Author *
-            <input type="text" value={form.author} onChange={update('author')} required maxLength={255} />
-          </label>
-          <label>
-            ISBN
-            <input type="text" value={form.isbn} onChange={update('isbn')}
-                   placeholder="optional" maxLength={20} />
-          </label>
-          <label>
-            Condition *
-            <select value={form.condition} onChange={update('condition')}>
+        <form onSubmit={handleSubmit} className="field-grid">
+          <div className="field">
+            <label htmlFor="title">Title *</label>
+            <input id="title" type="text" value={form.title}
+                   onChange={update('title')} required maxLength={255} />
+          </div>
+          <div className="field">
+            <label htmlFor="author">Author *</label>
+            <input id="author" type="text" value={form.author}
+                   onChange={update('author')} required maxLength={255} />
+          </div>
+          <div className="field">
+            <label htmlFor="isbn">ISBN</label>
+            <input id="isbn" type="text" value={form.isbn}
+                   onChange={update('isbn')} placeholder="optional" maxLength={20} />
+          </div>
+          <div className="field">
+            <label htmlFor="condition">Condition *</label>
+            <select id="condition" value={form.condition} onChange={update('condition')}>
               <option value="NEW">New — looks unread</option>
               <option value="GOOD">Good — minor wear</option>
               <option value="FAIR">Fair — readable but worn</option>
               <option value="POOR">Poor — significant wear</option>
             </select>
-          </label>
+          </div>
           <div className="full-width">
-            <button type="submit" className="btn btn-primary" disabled={submitting}>
+            <button type="submit" className="btn btn-accent" disabled={submitting}>
               {submitting ? 'Submitting…' : 'Submit donation'}
             </button>
           </div>
         </form>
       </section>
 
-      <h2>Your donation history</h2>
+      <h2 style={{ marginBottom: 16 }}>Your donation history</h2>
       {loading ? (
         <p className="muted">Loading…</p>
       ) : history.length === 0 ? (
         <p className="muted">You haven't donated anything yet.</p>
       ) : (
-        <div className="staff-book-list">
+        <div className="row-list">
           {history.map((d) => {
             const info = STATUS_LABELS[d.status] || { label: d.status, tone: '' };
             return (
-              <div key={d.id} className="staff-book-row">
-                <div>
-                  <strong>{d.title}</strong>
+              <div key={d.id} className="row-item">
+                <div className="row-item-info">
+                  <h3>{d.title}</h3>
                   <p className="muted">by {d.author} · condition: {d.condition.toLowerCase()}</p>
-                  <p className="muted">Donated {d.donationDate}</p>
+                  <p>Donated {d.donationDate}</p>
                 </div>
                 <span className={`chip ${info.tone}`}>{info.label}</span>
               </div>

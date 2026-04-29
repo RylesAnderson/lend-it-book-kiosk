@@ -46,7 +46,7 @@ export default function Navbar() {
         ) : (
           <>
             <Link to="/login">Login</Link>
-            <Link to="/register" className="btn btn-primary">Sign up</Link>
+            <Link to="/register">Sign up</Link>
           </>
         )}
       </nav>

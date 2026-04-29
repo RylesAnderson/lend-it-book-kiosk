@@ -13,8 +13,8 @@ function LoanRow({ loan, onReturn, returningId }) {
   const overdue = isActive && daysLeft < 0;
 
   return (
-    <div className={`loan-row ${overdue ? 'loan-overdue' : ''}`}>
-      <div className="loan-info">
+    <div className={`row-item ${overdue ? 'row-overdue' : ''}`}>
+      <div className="row-item-info">
         <h3>{loan.bookTitle}</h3>
         <p className="muted">by {loan.bookAuthor}</p>
         <p>
@@ -24,7 +24,7 @@ function LoanRow({ loan, onReturn, returningId }) {
           {loan.returnDate && ` · Returned ${loan.returnDate}`}
         </p>
       </div>
-      <div className="loan-action">
+      <div className="row-item-actions">
         <span className={`chip ${isActive ? (overdue ? 'chip-warn' : 'chip-ok') : ''}`}>
           {loan.status}
         </span>
@@ -63,56 +63,45 @@ export default function MyLoans() {
 
   useEffect(() => { fetchLoans(); }, []);
 
-  const handleReturn = async (loanId) => {
-    setReturningId(loanId);
+  const handleReturn = async (id) => {
+    setReturningId(id);
+    setError('');
     try {
-      await api.post(`/loans/${loanId}/return`);
+      await api.post(`/loans/${id}/return`);
       await fetchLoans();
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not return this book.');
+      setError(err.response?.data?.message || 'Could not return.');
     } finally {
       setReturningId(null);
     }
   };
 
-  const activeLoans = loans.filter((l) => l.status === 'ACTIVE');
-  const pastLoans = loans.filter((l) => l.status !== 'ACTIVE');
+  const active = loans.filter((l) => l.status === 'ACTIVE');
+  const past = loans.filter((l) => l.status !== 'ACTIVE');
 
   return (
-    <div className="page">
+    <div className="page page-narrow">
       <div className="page-header">
+        <div className="eyebrow">Your account</div>
         <h1>My loans</h1>
-        <p className="muted">Your active and past borrows.</p>
+        <p>Books you've checked out from the kiosk. Return them when you're done.</p>
       </div>
 
       {loading && <p className="muted">Loading…</p>}
       {error && <div className="error">{error}</div>}
+      {!loading && loans.length === 0 && <p className="muted">No loans yet.</p>}
 
-      {!loading && loans.length === 0 && (
-        <p className="muted">You haven't borrowed anything yet.</p>
-      )}
+      <div className="row-list">
+        {active.length > 0 && <h2>Active ({active.length})</h2>}
+        {active.map((l) =>
+          <LoanRow key={l.id} loan={l} onReturn={handleReturn} returningId={returningId} />
+        )}
 
-      {activeLoans.length > 0 && (
-        <section>
-          <h2>Active ({activeLoans.length})</h2>
-          <div className="loan-list">
-            {activeLoans.map((l) => (
-              <LoanRow key={l.id} loan={l} onReturn={handleReturn} returningId={returningId} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {pastLoans.length > 0 && (
-        <section>
-          <h2>History</h2>
-          <div className="loan-list">
-            {pastLoans.map((l) => (
-              <LoanRow key={l.id} loan={l} onReturn={handleReturn} returningId={returningId} />
-            ))}
-          </div>
-        </section>
-      )}
+        {past.length > 0 && <h2>History</h2>}
+        {past.map((l) =>
+          <LoanRow key={l.id} loan={l} onReturn={handleReturn} returningId={returningId} />
+        )}
+      </div>
     </div>
   );
 }

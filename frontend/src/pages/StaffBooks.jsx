@@ -105,7 +105,7 @@ export default function StaffBooks() {
             Description
             <textarea value={form.description} onChange={update('description')} maxLength={1000} rows={3} />
           </label>
-          <div className="full-width" style={{ display: 'flex', gap: 8 }}>
+          <div className="full-width" style={{ display: 'flex', gap: 8, marginTop: '10px'}}>
             <button type="submit" className="btn btn-primary" disabled={submitting}>
               {submitting ? 'Adding…' : 'Add book'}
             </button>
@@ -136,7 +136,7 @@ export default function StaffBooks() {
                 className="btn btn-ghost"
                 onClick={() => handleDelete(book)}
                 disabled={deletingId === book.id}
-                style={{ color: '#b91c1c', borderColor: '#fecaca' }}
+                style={{ color: '#b91c1c', borderColor: '#df4040', marginBottom: '10px'}}
               >
                 {deletingId === book.id ? 'Deleting…' : 'Delete'}
               </button>

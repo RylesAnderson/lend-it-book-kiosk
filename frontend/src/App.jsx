@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import TopBar from './components/TopBar.jsx';
 import Navbar from './components/Navbar.jsx';
+import Footer from './components/Footer.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import BrowseBooks from './pages/BrowseBooks.jsx';
@@ -28,6 +30,7 @@ function ProtectedRoute({ children, requireRole }) {
 export default function App() {
   return (
     <div className="app">
+      <TopBar />
       <Navbar />
       <main className="main">
         <Routes>
@@ -35,14 +38,11 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Public — InstructionGuide use case */}
           <Route path="/instructions" element={<Instructions />} />
 
-          {/* Catalog */}
           <Route path="/books" element={<BrowseBooks />} />
           <Route path="/books/:id" element={<BookDetail />} />
 
-          {/* Authenticated student features */}
           <Route path="/my-loans" element={
             <ProtectedRoute><MyLoans /></ProtectedRoute>
           } />
@@ -53,7 +53,6 @@ export default function App() {
             <ProtectedRoute><Donate /></ProtectedRoute>
           } />
 
-          {/* Staff / admin */}
           <Route path="/staff" element={
             <ProtectedRoute requireRole="STAFF"><StaffBooks /></ProtectedRoute>
           } />
@@ -61,9 +60,15 @@ export default function App() {
             <ProtectedRoute requireRole="ADMIN"><AdminReports /></ProtectedRoute>
           } />
 
-          <Route path="*" element={<p style={{ padding: 24 }}>Page not found.</p>} />
+          <Route path="*" element={
+            <div className="page page-narrow">
+              <h1>Page not found</h1>
+              <p className="muted">That route doesn't exist. Try Browse or How to use.</p>
+            </div>
+          } />
         </Routes>
       </main>
+      <Footer />
     </div>
   );
 }

@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
+const EMPTY = { name: '', email: '', password: '' };
+
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [form, setForm] = useState(EMPTY);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -20,52 +22,64 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      await register(form.name, form.email, form.password);
+      await register(form);
       navigate('/books');
     } catch (err) {
-      setError(err.response?.data?.message || 'Could not create account.');
+      setError(err.response?.data?.message || 'Could not create your account.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="auth-page">
-      <form className="card auth-form" onSubmit={handleSubmit}>
-        <h1>Create an account</h1>
-        <p className="muted">Sign up to start borrowing from the kiosk.</p>
+    <div className="auth-shell">
+      <aside className="auth-aside">
+        <div className="auth-aside-eyebrow">Free membership</div>
+        <div>
+          <h2 className="auth-aside-headline">
+            Open a <em>card</em>.
+          </h2>
+          <p className="auth-aside-blurb">
+            One account is all you need to borrow books, reserve titles when
+            they're checked out, and donate books you've finished.
+          </p>
+        </div>
+        <div className="auth-aside-meta">
+          Already a member? <Link to="/login" style={{ color: '#FFF' }}>Sign in</Link>.
+        </div>
+      </aside>
 
-        <label>
-          Full name
-          <input type="text" value={form.name} onChange={update('name')} required autoFocus />
-        </label>
+      <main className="auth-main">
+        <form className="auth-form" onSubmit={handleSubmit}>
+          <h1>Create account</h1>
+          <p>Already have one? <Link to="/login">Sign in</Link>.</p>
 
-        <label>
-          Email
-          <input type="email" value={form.email} onChange={update('email')} required />
-        </label>
+          <div className="field">
+            <label htmlFor="name">Full name</label>
+            <input id="name" type="text" value={form.name}
+                   onChange={update('name')} required autoFocus />
+          </div>
 
-        <label>
-          Password
-          <input
-            type="password"
-            value={form.password}
-            onChange={update('password')}
-            required
-            minLength={6}
-          />
-        </label>
+          <div className="field">
+            <label htmlFor="email">Email</label>
+            <input id="email" type="email" value={form.email}
+                   onChange={update('email')} required autoComplete="email" />
+          </div>
 
-        {error && <div className="error">{error}</div>}
+          <div className="field">
+            <label htmlFor="password">Password</label>
+            <input id="password" type="password" value={form.password}
+                   onChange={update('password')} required minLength={6}
+                   autoComplete="new-password" />
+          </div>
 
-        <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? 'Creating…' : 'Create account'}
-        </button>
+          {error && <div className="error">{error}</div>}
 
-        <p className="muted center">
-          Already have an account? <Link to="/login">Log in</Link>
-        </p>
-      </form>
+          <button type="submit" className="btn btn-primary btn-lg" disabled={loading}>
+            {loading ? 'Creating…' : 'Create account'}
+          </button>
+        </form>
+      </main>
     </div>
   );
 }
