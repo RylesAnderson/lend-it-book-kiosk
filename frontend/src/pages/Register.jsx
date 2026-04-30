@@ -22,7 +22,7 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      await register(form);
+      await register(form.name, form.email, form.password);
       navigate('/books');
     } catch (err) {
       setError(err.response?.data?.message || 'Could not create your account.');

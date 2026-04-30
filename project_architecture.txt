@@ -1,0 +1,73 @@
+
+backend/
+├── pom.xml
+└── src/main/
+    ├── java/com/lendit/bookkiosk/
+    │   ├── config/
+    │   │   ├── CorsConfig.java
+    │   │   └── DataSeeder.java
+    │   ├── controller/
+    │   │   ├── AuthController.java
+    │   │   ├── BookController.java
+    │   │   ├── LoanController.java
+    │   │   ├── ReservationController.java
+    │   │   ├── DonationController.java
+    │   │   ├── NotificationController.java
+    │   │   └── ReportController.java
+    │   ├── dto/
+    │   ├── model/
+    │   │   ├── User.java
+    │   │   ├── Book.java
+    │   │   ├── Loan.java
+    │   │   ├── Reservation.java
+    │   │   ├── Donation.java
+    │   │   └── EmailNotification.java
+    │   ├── repository/
+    │   │   ├── UserRepository.java
+    │   │   ├── BookRepository.java
+    │   │   ├── LoanRepository.java
+    │   │   ├── ReservationRepository.java
+    │   │   ├── DonationRepository.java
+    │   │   └── NotificationRepository.java
+    │   ├── service/
+    │   │   ├── AuthService.java
+    │   │   ├── BookService.java
+    │   │   ├── LoanService.java
+    │   │   ├── ReservationService.java
+    │   │   ├── DonationService.java
+    │   │   ├── NotificationService.java
+    │   │   └── ReportService.java
+    │   └── BookKioskApplication.java
+    └── resources/
+        ├── application.properties
+        └── data.sql
+		
+		
+frontend/
+├── src/
+│   ├── api/
+│   │   └── client.js
+│   ├── components/
+│   │   ├── Navbar.jsx
+│   │   ├── TopBar.jsx
+│   │   ├── Footer.jsx
+│   │   ├── BookCard.jsx
+│   │   └── NotificationBell.jsx
+│   ├── context/
+│   │   ├── AuthContext.jsx
+│   │   └── NotificationContext.jsx
+│   ├── pages/
+│   │   ├── BrowseBooks.jsx
+│   │   ├── BookDetail.jsx
+│   │   ├── Login.jsx
+│   │   ├── Register.jsx
+│   │   ├── MyLoans.jsx
+│   │   ├── MyReservations.jsx
+│   │   ├── Donate.jsx
+│   │   └── Instructions.jsx
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── styles.css
+├── index.html
+├── package.json
+└── vite.config.js
